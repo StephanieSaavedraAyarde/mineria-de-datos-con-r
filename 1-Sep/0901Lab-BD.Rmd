@@ -1,0 +1,34 @@
+# Cargado
+
+
+```{r}
+load(url("https://github.com/AlvaroLimber/MD_umsa/raw/main/data/eh21.RData"))
+```
+
+
+- Cualitativas
+
+```{r}
+
+library(dplyr)
+
+eh21p %>% group_by(depto) %>% summarize(n())
+eh21p %>% group_by(area) %>% summarize(n())
+  
+
+eh21p %>% group_by(depto) %>% summarise(personas = n ()) %>%
+  mutate(Porcentaje=(personas/sum(personas))*100)
+
+eh21p %>% group_by(p0) %>% summarise(personas = n ()) %>%
+  mutate(Porcentaje=(personas/sum(personas))*100)
+```
+
+- Cuantitativas
+
+```{r}
+
+
+
+
+```
+

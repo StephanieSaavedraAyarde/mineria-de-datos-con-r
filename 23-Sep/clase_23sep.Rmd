@@ -1,0 +1,52 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+# Ejercicio 1
+
+```{r}
+library(dplyr)
+library(haven)
+load(url("https://github.com/AlvaroLimber/MD_UCB/raw/main/eh21.RData"))
+
+table(eh21v$s07a_09)
+
+eh21v %>% mutate(tierra=s07a_09!=1) %>% summarise(mean(tierra))
+
+eh21v<-eh21v %>% mutate(tierra=s07a_09!=1)
+#área
+eh21v %>% group_by(area) %>% summarise(mean(tierra)*100)
+#depto
+eh21v %>% group_by(depto) %>% summarise(mean(tierra)*100)
+#sexo
+eh21p %>% mutate(mujer=s01a_02==2,jefe=s01a_05==1) %>% filter(jefe==T) %>% select(folio,mujer,jefe) %>% inner_join(eh21v) %>% group_by(mujer) %>% summarise(mean(tierra)*100)
+
+
+#o2
+aux<-eh21p %>% mutate(mujer=s01a_02==2,jefe=s01a_05==1) %>% filter(jefe==T) %>% select(folio,mujer,jefe)
+
+eh21v %>% inner_join(aux) %>% group_by(mujer) %>% summarise(mean(tierra)*100)
+
+#binarios
+(eh21v$s07a_09!=1)*1
+
+```
+
+
+# Ejercicio 2
+
+```{r}
+eh21p %>% group_by(folio) %>% mutate(mae=max(aestudio)) %>% select(folio,aestudio,mae)
+
+bd<-eh21p %>% mutate(jefe=s01a_05==1)  %>% group_by(folio) %>% mutate(mae=max(aestudio,na.rm = T)) %>% filter(jefe==T) %>% select(folio,area,aestudio,mae,jefe) 
+mean(bd$mae)
+
+bd %>% group_by(area) %>% summarise(mean(mae))
+
+eh21p %>% filter(folio=="111-000005-A-0121") %>% select(aestudio,s01a_03)
+
+eh21p %>% filter(is.na(aestudio)==T) %>% select(s01a_03) %>% hist()
+
+library(readxl)
+```

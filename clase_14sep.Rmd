@@ -1,0 +1,75 @@
+## Transformación
+
+Hasta este momento no se realizaron alteraciones o cambios a la base de datos original (bruta, primitiva). El objetivo de la transformación es introducir cambios en la base de datos, estos cambios pueden ser:
+
+  - Renombrar variables
+  - Adecuar los formatos
+  - Limpieza de texto
+  - Crear nuevas variables a partir de otras
+  - Tratar a los datos atípicos
+  - Tratar a los datos faltantes
+  - Agregar la información 
+
+### Renombrar variables
+
+Existen varias recomendaciones sobre el nombre de las variables, el principio básico es que sean **funcionales al investigador**. Sin embargo, hay algunas recomendaciones:
+
+  - Usar nombres cortos
+  - No usar espacios ni caracteres extraños (evitar problemas con e encoding); ejemplos ñ, los acentos, $,%,&,*.
+  - Usar solo mayúsculas o minúsculas
+  - Evitar nombres sólo con números o que inicie en un número
+  - Usar nombres intuitivos relacionas a la variable
+  
+### Adecuación de formatos
+
+Es importante asegurarse que las distintas variables de estudio se encuentren en el formato adecuado. En el R se debe tener cuidado con las variables cualitativas, estas deben ser declaradas como variables de tipo factor.
+
+### Limpieza de texto
+
+  + Mayúsculas, minúsculas
+  + Espacios
+  + Extraer partes
+  + Reemplazar
+
+### Creación de variables
+
+Se refiere a crear nuevas variables, estas pueden ser definidas con base a otras ya existentes o simplemente con algún criterio de utilidad.
+
+  + Constantes
+  + Binarias
+  + Funciones matemáticas
+  + Recodificar
+  + Agregar información
+  + Indicadores
+  
+### Valores atípicos
+
+Detectar y tratar los valores atípicos es muy relevante antes del modelado, ya que esto pueden afectar los resultados finales, recordar por ejemplo que la media es una medida susceptible a los valores atípicos y la media es un instrumento de muchos modelos de minería de datos. 
+
+Una manera inicial de tratar con datos atípicos en variables con fuertes variaciones es la transformación log. 
+
+En la mayoría de los casos de los modelos de minería de datos se trabaja con un enfoque multivariante, es decir, no se debe tratar los valores atípicos con un enfoque unidimensional. 
+
+Existen varias técnicas para detectar datos atípicos, entre las mas recomendadas son:
+
+  + Componentes principales (siguiente tema)
+  + Distancias a centros, vecindades. Bacon (agrupamiento)
+
+```{r}
+install.packages("wbacon")
+library(wbacon)
+data<-as.data.frame(matrix(rnorm(1000),100,10))
+data$V1[1]<-10
+m1<-wBACON(data)
+m1
+is_outlier(m1)
+which(is_outlier(m1))
+summary(m1)
+plot(m1)
+```
+
+El tratamiento de los datos atípicos es muy diverso y depende de los insumos con los que se cuente.
+
+  - Si encontramos datos atípicos, se sugiere verificar el vector de observación y evaluar si se trata de un dato correcto o un dato incorrecto o mal transcrito.
+  - Si no es posible lo anterior, se sugiere no tomar en cuentas los casos registrados como atípicos y si se trata de un proyecto continuo, se sugiere analizar los casos atípicos de forma aparte.
+  - Una última estrategia para tratar datos atípicos cuando no se quiere perder la información es *imputar los datos atípicos*. 

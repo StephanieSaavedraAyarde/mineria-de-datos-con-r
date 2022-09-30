@@ -1,0 +1,86 @@
+---
+title: "0831Lab-MD"
+output: html_document
+date: "2022-08-31"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+$$\int_0$$
+
+```{r, echo=FALSE}
+x = 1:100
+y = x^2
+```
+
+```{r, echo=FALSE}
+plot(x,y)
+```
+
+
+## Importacion
+
+Traer una base de datos externa y cargarla en el sistema de interes, en nuestro caso R.
+
+
+```{r}
+rm(list=ls())
+
+library(haven)
+library(readxl)
+
+getwd()
+setwd("/Users/ignaciopaz/University/DataMining")
+
+bd20 <- read.csv("en2020.csv", sep="|")
+save(bd20, file="bd20.RData")
+View(bd20)
+```
+
+## Exploracion
+
+Ejemplo, en la base de datos de las elecciones 2020
+
++ Unidad de investigacion (fila): Encontrar un ID, key: Mesas Electorales
++ Variables Geograficas, identificacion del recinto y la mesa, finalmente variables vinculadas a los votos por partido politico.
+
+
+```{r}
+unique(bd20$Nombre.DEPARTAMENTO)
+length(unique(bd20$Codigo.20))
+names(bd20)
+```
+
+### Diccionario de Variables
+
+Es u nlistado de las variables y sus caracteristicas de formato y alguna informacion adicional, Lo mas importante es saber que variables son cualitativas y cuales cuantitativas.
+
+```{r}
+str(bd20) #estructura
+str(bd20$VALIDOS)
+```
+
+### Niveles de agregacion
+
+La base de datos puede tener ua unidad de investigacion **elemental**, pero, puede tener tambien informacion de unidades de interes mas grandes, es decir; que agreguen a las unidades elementales
+
+> Problema: Construir una base de datos a nivel de los recintos, con la infomracion de los votos para el MAS, CC, VALIDOS
+
+```{r}
+library(dplyr) #Gramatica de datos
+bdre20 <- bd20 %>% group_by(Codigo.RECINTO, Nombre.RECINTO) %>% summarise(sum(CC), sum(MAS.IPSP), sum(VALIDOS))
+View(bdre20)
+``` 
+
+### Descripcion univariada
+
+El objetivo es conocer estadisticas basicas de cada variable.
+
+  + Cualitativas: Conteo, %
+  + Cuantitativas: Tendencia Central, Variabilidad, 
+
+

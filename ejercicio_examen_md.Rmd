@@ -1,0 +1,73 @@
+---
+title: "Ejercicio1_pre-examen"
+output: html_document
+date: "2022-09-23"
+---
+
+> Problema: % de hogares con tipo de vivienda de suelo en la vivienda distinto a tierra. Los resultados por área, departamento, sexo del jefe/a de familia
+
+```{r}
+# Identificar caracteristicas, identificar variables
+# Buscar la variable principal del objeto de estudio, en la BDD
+rm(list=ls())
+load(url("https://github.com/AlvaroLimber/MD_UCB/raw/main/eh21.RData"))
+
+#Habilitar librerias
+library(dplyr)
+library(haven)
+
+#mutate es para crear
+
+table(eh21v$s07a_09)
+aux<-unique(eh21v$s07a_09)
+
+# Global
+eh21v %>% mutate(tierra=(s07a_09!=1)) %>% summarise(mean(tierra))
+                  
+eh21v <- eh21v %>% mutate(tierra=(s07a_09!=1))
+                        
+# Por area
+eh21v %>% group_by(area) %>% summarise(mean(tierra)*100)
+
+# Por departamento
+eh21v %>% group_by(depto) %>% summarise(mean(tierra)*100)
+
+# Por sexo
+eh21p %>% mutate(mujer=s01a_02==2, jefe=s01a_05==1) %>% filter(jefe==T) %>% select(folio, mujer, jefe) %>% inner_join(eh21v) %>% group_by(mujer) %>% summarise(mean(tierra)*100)
+
+
+```
+
+> Problema: Calcular el promedio por hogar de los años de educación máxima dentro de cada hogar, mostrar el resultado global y por área
+
+```{r}
+# Identificar caracteristicas, identificar variables
+# Buscar la variable principal del objeto de estudio, en la BDD
+rm(list=ls())
+load(url("https://github.com/AlvaroLimber/MD_UCB/raw/main/eh21.RData"))
+
+#Habilitar librerias
+library(dplyr)
+library(haven)
+library(redxl)
+
+#mutate es para crear
+
+table(eh21p$aestudio)
+aux<-unique(eh21p$aestudio)
+
+# Global
+eh21p %>% group_by(folio) %>% mutate(maxed=max(aestudio)) %>% select(folio,aestudio,maxed)
+
+bd <- eh21p %>% mutate(jefe=s01a_05==1) %>% group_by(folio) %>% mutate(maxed=max(aestudio, na.rm =T)) %>% filter(jefe==T) %>% select(folio,area, aestudio, maxed, jefe)
+
+mean(bd$maxed)
+
+bd %>% group_by(area) %>% summarise(mean(maxed))
+
+eh21p %>% filter(folio="111-000005-A-0021") %>% select(aestudio, s01a_03)
+
+
+eh21p %>% filter(is.na(aestudio)== T) %>% select(s01a_03) %>% hist()
+                  
+```

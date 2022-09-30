@@ -1,0 +1,41 @@
+---
+title: "0923Ejercicios"
+output: html_document
+date: "2022-09-23"
+editor_options:
+  chunk_output_type: console
+---
+
+## Ejercicio 1
+
+% de hogares con tipo de suelo en la vivienda distinto a tierra, 
+los resultados por: Area, departamento, sexo del jefe/a
+
+
+```{r}
+library(dplyr)
+library(haven)
+```
+
+
+
+```{r}
+table(eh21v$s07a_09)
+
+eh21v %>% mutate(tierra=s07a_09 != 1) %>% summarise(mean(tierra))
+
+eh21v <- eh21v %>% mutate(tierra=s07a_09 != 1)
+
+eh21v %>% group_by(area) %>% summarise(mean(tierra))
+
+eh21v %>% group_by(depto) %>% summarise(mean(tierra))
+                          
+#table(eh21v$tierra)
+
+eh21p %>% mutate(mujer=s01a_02==2, jefe=s01a_05==1) %>%
+  filter(jefe==T) %>% select(folio, mujer, jefe) %>% inner_join(eh21v) %>%
+  group_by(mujer) %>% summarise(mean(tierra)*100)
+
+                          
+
+```

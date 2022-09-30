@@ -1,0 +1,87 @@
+### Descripción univariada 
+
+El objetivo es conocer estadísticas básicas de cada variable.
+
+  + Cualitativas: Conteo, %
+  + Cuantitativas: tendencia central, variabilidad, medidas de forma, densidad. 
+
+Encuesta a hogares
+
+```{r}
+rm(list=ls())
+library(haven)
+eh21p<-read_sav("/Volumes/GoogleDrive-101013334586839798098/My Drive/BD_MD/eh2021/EH2021_Persona.sav")
+eh21v<-read_sav("/Volumes/GoogleDrive-101013334586839798098/My Drive/BD_MD/eh2021/EH2021_Vivienda.sav")
+eh21di<-read_sav("/Volumes/GoogleDrive-101013334586839798098/My Drive/BD_MD/eh2021/EH2021_Discriminacion.sav")
+eh21eq<-read_sav("/Volumes/GoogleDrive-101013334586839798098/My Drive/BD_MD/eh2021/EH2021_Equipamiento.sav")
+save(eh21p,eh21v,eh21di,eh21eq,file = "eh21.RData")
+
+load(url("https://github.com/AlvaroLimber/MD_umsa/raw/main/data/eh21.RData"))
+```
+
+  - Cualitativas
+  
+```{r}
+library(dplyr)
+# depto p0 area
+eh21p %>% group_by(depto) %>% summarise(n())#conteo
+eh21p %>% group_by(area) %>% summarise(n())
+
+eh21p %>% group_by(depto) %>% summarise(personas=n()) %>% mutate(Porcentaje=(personas/sum(personas))*100)
+
+eh21p %>% group_by(p0) %>% summarise(personas=n()) %>% mutate(Porcentaje=(personas/sum(personas))*100)
+```
+
+  - Cuantitativas  
+
+```{r}
+#aestudio años de educación
+#ylab ingreso laboral mensual
+#  edad s01a_03
+
+mean(eh21p$s01a_03)
+median(eh21p$s01a_03)
+sd(eh21p$s01a_03)
+summary(eh21p$s01a_03)
+quantile(eh21p$s01a_03,c(0.25,0.95))
+
+quantile(eh21p$ylab,na.rm = T)
+quantile(eh21p$ylab,c(0.1,0.2,0.3,0.4),na.rm = T)
+quantile(eh21p$ylab,seq(0,1,0.1),na.rm = T)
+seq(0,1,0.1)
+quantile(eh21p$ylab,seq(0,1,0.01),na.rm = T)
+seq(0,1,0.1)
+#install.packages("ggplot2")
+library(ggplot2)# Gramática de figuras
+
+ggplot(eh21p,aes(aestudio))+geom_density()
+ggplot(eh21p,aes(ylab))+geom_density()
+ggplot(eh21p,aes(ylab))+geom_boxplot()
+ggplot(eh21p,aes(log(ylab)))+geom_boxplot()
+ggplot(eh21p,aes(log(ylab)))+geom_density()
+```
+
+Gramática de figuras
+
+  - Base de datos
+  - Estética (variables)
+  - Geometría
+
+### Identificando relaciones
+
+El objetivo es tener una medida estadística que nos indique algo sobre la relación existente entre 2 o más variables.
+
+  - Cuali vs cuali
+
+```{r}
+library(haven)
+# Área pobreza
+table(eh21p$area,eh21p$p0)
+chisq.test(table(eh21p$area,eh21p$p0))
+```
+
+Test de independencia $\chi^2$
+
+  - H0: Independencia
+
+Cuanti vs cuanti: Lo más útil y práctico es hacer una **correlación**, sin embargo, lo que se estudia es una relación lineal, además son relaciones *casuales*

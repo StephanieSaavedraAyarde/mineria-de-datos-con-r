@@ -1,0 +1,183 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+## Transformación
+
+Hasta este momento no se realizaron alteraciones o cambios a la base de datos original (bruta, primitiva). El objetivo de la transformación es introducir cambios en la base de datos, estos cambios pueden ser:
+
+  - Renombrar variables
+  - Adecuar los formatos
+  - Limpieza de texto
+  - Crear nuevas variables a partir de otras
+  - Tratar a los datos atípicos
+  - Tratar a los datos faltantes
+  - Agregar la información 
+
+### Renombrar variables
+
+Existen varias recomendaciones sobre el nombre de las variables, el principio básico es que sean **funcionales al investigador**. Sin embargo, hay algunas recomendaciones:
+
+  - Usar nombres cortos
+  - No usar espacios ni caracteres extraños (evitar problemas con e encoding); ejemplos ñ, los acentos, $,%,&,*.
+  - Usar solo mayúsculas o minúsculas
+  - Evitar nombres sólo con números o que inicie en un número
+  - Usar nombres intuitivos relacionas a la variable
+  - Evitar sobre escribir otras variables
+  
+### Adecuación de formatos
+
+Es importante asegurarse que las distintas variables de estudio se encuentren en el formato adecuado. En el R se debe tener cuidado con las variables cualitativas, estas deben ser declaradas como variables de tipo factor.
+
+```{r}
+x<-c(1,2,3,"hola",4)
+mean(x)
+typeof(x)
+xx<-as.numeric(x)
+mean(xx,na.rm = T)
+#as.character()# convertir a texto
+sexo<-c(1,2,2,1,1,1,1,1,2,2)
+sexo
+summary(sexo)
+sexo1<-as.factor(sexo)
+summary(sexo1)
+#etiquetas
+sexo2<-factor(sexo,c(1,2),c("H","M"))
+sexo2
+summary(sexo2)
+plot(sexo2)
+#escala
+aa<-c(1,1,1,1,2,2,2,1,2,1,3,3,3)
+aa
+factor(aa,c(1,2),c("Alto","Medio"))
+factor(aa,c(1,2,3),c("Alto","Medio","Bajo"))
+factor(aa,c(1,2,3,9),c("Alto","Medio","Bajo","No responde"))
+```
+
+Para trabajar con variables relacionadas a fechas y hora, se recomienda explorar la librería **lubridate**
+
+### Limpieza de texto
+
+  + Mayúsculas, minúsculas
+  + Espacios
+  + Extraer partes
+  + Reemplazar
+  + Eliminar números, símbolos, stopwords
+  
+```{r}
+library(dplyr)
+x<-c("Hola a todos y a todas",
+     "Hóla a Todos Y a todaS",
+     "Hola     a Todos Y a todaS    ",
+     "    Hola   a todos, y a todas   ",
+     "HolX a tXdo5 y a todas")
+tolower(x)
+toupper(x)
+x %>% tolower()
+
+gsub("o","x",c("bolivia","cochabamba"))
+## y
+y<-tolower(x)
+y<-gsub("hóla","hola",y)
+y<-gsub("holx","hola",y)
+y<-gsub("txdo5","todos",y)
+y<-gsub(",","",y)
+library(stringr)
+y
+str_trim(y)
+y<-str_squish(y)
+y
+nchar(y)
+substr(y,7,22)
+str_split(y," ")
+
+str_split("cochabamba","a")
+str_split(y," ")
+#install.packages("tm")
+library(tm)# text minning
+
+w<-c("hola a todos y todas, hoy es 14 de septiembre de 2022!!!!")
+w %>% removeNumbers() %>% removePunctuation() %>% removeWords(stopwords("es")) %>% str_squish()
+
+stopwords("es")
+```
+
+### Creación de variables
+
+Se refiere a crear nuevas variables, estas pueden ser definidas con base a otras ya existentes o simplemente con algún criterio de utilidad.
+
+  + Constantes
+  + Binarias
+  + Funciones matemáticas
+  + Recodificar
+  + Agregar información
+  + Indicadores
+  
+```{r}
+load(url("https://github.com/AlvaroLimber/MD_UCB/raw/main/eh21.RData"))
+# Constantes
+eh21p %>% mutate(x=1) %>% select(folio,x)
+eh21p %>% mutate(x=n()) %>% select(folio,x)
+eh21p %>% group_by(folio) %>% mutate(x=n()) %>% select(folio,x)
+# Binarias}
+eh21p %>% mutate(mujer=(s01a_02==2)) %>% select(s01a_02,mujer)
+
+eh21p %>% mutate(g60=(s01a_03>=60)) %>% select(s01a_03,g60)
+
+eh21p %>% mutate(g60=(s01a_03>=60)) %>% select(s01a_03,g60) %>% summarise(g60=mean(g60)*100)
+
+eh21p %>% mutate(g60=(s01a_03>=60)) %>% select(area,s01a_03,g60) %>% group_by(area)%>%  summarise(g60=mean(g60)*100)
+#crear una variable binaria que identifique a las personas menores de 5 y mayores de 60, simultaneamente.
+eh21p<-eh21p %>% rename(edad=s01a_03) %>% 
+  mutate(g560=(edad<5 | edad>60))
+eh21p %>% select(edad,g560) %>% tail()
+
+eh21p %>% group_by(depto) %>% summarise(g560=mean(g560)*100)
+
+bd<-eh21p %>% filter(g560==T)
+
+# Funciones matemáticas
+hist(eh21p$ylab)
+eh21p<-eh21p %>% mutate(lylab=log(ylab))
+hist(eh21p$lylab)
+#estandarización
+eh21p<-eh21p %>% mutate(sylab=scale(ylab))
+hist(eh21p$sylab)
+# Recodificar
+# Agregar información
+# Indicadores
+```
+  
+  
+### Valores atípicos
+
+Detectar y tratar los valores atípicos es muy relevante antes del modelado, ya que esto pueden afectar los resultados finales, recordar por ejemplo que la media es una medida susceptible a los valores atípicos y la media es un instrumento de muchos modelos de minería de datos. 
+
+Una manera inicial de tratar con datos atípicos en variables con fuertes variaciones es la transformación log. 
+
+En la mayoría de los casos de los modelos de minería de datos se trabaja con un enfoque multivariante, es decir, no se debe tratar los valores atípicos con un enfoque unidimensional. 
+
+Existen varias técnicas para detectar datos atípicos, entre las mas recomendadas son:
+
+  + Componentes principales (siguiente tema)
+  + Distancias a centros, vecindades. Bacon (agrupamiento)
+
+```{r}
+install.packages("wbacon")
+library(wbacon)
+data<-as.data.frame(matrix(rnorm(1000),100,10))
+data$V1[1]<-10
+m1<-wBACON(data)
+m1
+is_outlier(m1)
+which(is_outlier(m1))
+summary(m1)
+plot(m1)
+```
+
+El tratamiento de los datos atípicos es muy diverso y depende de los insumos con los que se cuente.
+
+  - Si encontramos datos atípicos, se sugiere verificar el vector de observación y evaluar si se trata de un dato correcto o un dato incorrecto o mal transcrito.
+  - Si no es posible lo anterior, se sugiere no tomar en cuentas los casos registrados como atípicos y si se trata de un proyecto continuo, se sugiere analizar los casos atípicos de forma aparte.
+  - Una última estrategia para tratar datos atípicos cuando no se quiere perder la información es *imputar los datos atípicos*. 

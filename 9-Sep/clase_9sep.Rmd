@@ -1,0 +1,74 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+### Pivot, Reshape
+
+```{r}
+library(haven)
+library(dplyr)
+load(url("https://github.com/AlvaroLimber/MD_UCB/raw/main/eh21.RData"))
+```
+
+
+> Problema: Cuál es la cantidad promedio de tenencia del equipamiento (17 items) en los hogares?.
+
+```{r}
+eh21eq %>% mutate(aux=(s09c_14==1)) %>% select(folio,aux) %>% group_by(folio) %>% summarise(teq=sum(aux)) %>% summarise(mean(teq))
+```
+
+> Problema: Generar una base de datos a nivel de folio, donde existan 17 variables que indiquen si el hogar cuenta o no con un determinado equipamiento.
+
+```{r}
+library(tidyr)
+#?pivot_longer()
+bd1<-eh21eq %>% select(folio,item,s09c_14) %>% pivot_wider(names_from = item, values_from = s09c_14, names_prefix = "it.")
+#incluyendo el resto de variables del equipamiento
+bd2<-eh21eq %>% select(folio,item,s09c_14:s09c_17) %>%  pivot_wider(names_from = item, values_from = s09c_14:s09c_17)
+```
+
+Tarea para su casa: Usar la base de datos bd2 y transformarla a la original. WIDE a LONG.
+
+### Uniendo bases de datos
+
+Vamos a distinguir 2 tipos de uniones:
+
+  * Con la finalidad de incrementar observaciones (filas)
+  * Con la finalidad de incrementar variables (columnas)
+
+> Problema: Crear 2 bases de datos a partir de la base de viviendas, según el departamento: Una para Beni, la otra Cochabamba. Luego unir esas bases de datos.
+
+```{r}
+#Beni 8, Cochabamba 3. 
+bn<-eh21v %>% filter(depto==8)
+cb<-eh21v %>% filter(depto==3)
+#combinar bases por filas 
+bd3<-rbind(bn,cb)#apilar bases de datos
+bd4<-bind_rows(bn,cb)
+```
+
+Recomendaciones:
+
+  * Se debe adecuar los *nombres* de las variables en las bases de datos que se van a unir. Asegurarse que sean los mismos nombres, verificar las mayúsculas, minúsculas.
+  * Asegurarse que las variables similares en las bases de datos tengan el mismo *formato*.
+
+> Problema: Unir la base de datos de vivienda con la base de datos de equipamiento generada en el pivot.
+
+Cuando el objetivo es traer variables de una base de datos externa a la base de datos de trabajo, se debe identificar una variable de union "key".
+
+```{r}
+#merge R
+eh21va<-merge(eh21v,bd2)# (folio v) 1:1 (folio e)
+bna<-merge(bn,bd2)# 1:1 manda la base principal
+bna2<-merge(bn,bd2,all.y = T)# 1:1 manda la base externa
+eh21p_eq<-merge(eh21p,bd2)# (folio personas) n:1 (folio e)
+#dplyr
+#left_join
+a1<-left_join(bn,bd2)
+#right_join
+a2<-right_join(bn,bd2)
+#inner_join conserva todas las uniones existentes
+a3<-inner_join(bn,bd2)
+```
+

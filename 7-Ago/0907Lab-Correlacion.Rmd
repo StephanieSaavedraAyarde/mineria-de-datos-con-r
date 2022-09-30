@@ -1,0 +1,74 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+# Preprocesamiento
+
+## Exploración
+
+### Identificando relaciones
+
+El objetivo es tener una medida estadística que nos indique algo sobre la relación existente entre 2 o más variables.
+
+  - Cuali vs cuali
+
+Test de independencia $\chi^2$
+
+  - H0: Independencia
+
+Cuanti vs cuanti: Lo más útil y práctico es hacer una **correlación**, sin embargo, lo que se estudia es una relación lineal, además son relaciones *casuales*
+
+### Aproximación Visual (Visualización)
+
+```{r}
+rm(list=ls())
+library(GGally)
+library(Hmisc)
+library(haven)
+library()
+library("TeachingDemos")
+load(url("https://github.com/AlvaroLimber/MD_UCB/raw/main/eh21.RData"))
+ggpairs()
+faces()
+describe()
+```
+
+## Filtrado y selección
+### Filtrado de observaciones
+### Selección de variables
+### Pivot, Reshape
+
+> Problema: Cuál es la cantidad promedio de tenencia del equipamiento (17 items) en los hogares?. Mostrar un histograma.
+
+> Problema: Generar una base de datos a nivel de folio, donde existan 17 variables que indiquen si el hogar cuenta o no con un determinado equipamiento.
+
+```{r}
+library(tidyr)
+#?pivot_longer()
+#?pivot_wider()
+```
+
+### Uniendo bases de datos
+
+Vamos a distinguir 2 tipos de uniones:
+
+  * Con la finalidad de incrementar observaciones (filas)
+  * Con la finalidad de incrementar variables (columnas)
+
+> Problema: Crear 2 bases de datos a partir de la base de viviendas, según el departamento: Una para Beni, la otra Cochabamba. Luego unir esas bases de datos.
+
+Recomendaciones:
+
+  * Se debe adecuar los *nombres* de las variables en las bases de datos que se van a unir. Asegurarse que sean los mismos nombres, verificar las mayúsculas, minúsculas.
+  * Asegurarse que las variables similares en las bases de datos tengan el mismo *formato*.
+
+> Problema: 
+
+```{r}
+#merge
+#left_join
+#right_join
+#inner_join
+```
+
